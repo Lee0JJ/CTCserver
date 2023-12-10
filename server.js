@@ -18,7 +18,7 @@ app.use(cors({origin: "*"}))
 
 app.get('/', (req, res) => {
     
-    res.send('Hello World!');
+    res.send('New Yee Dog !');
 });
 
 app.get('/api', (req, res) => {
@@ -138,7 +138,8 @@ app.post('/concert', (req, res) => {
 
 
 
-    const query = `INSERT INTO concert (organizerid, name, owner, venue, description, category, createdDate, conductedDate, numZone, zoneinfo, totalSeat, imgurl) VALUES (${organizerid}, '${name}', '${owner}', '${venue}', '${description}', '${category}', '${createdDate}', '${conductedDate}', ${numZone}, '${zoneinfo}', '${totalSeat}' , '${imgurl}')`;
+    const query = `INSERT INTO concert (organizerid, name, owner, venue, description, category, createdDate, conductedDate, numZone, zoneinfo, totalSeat, imgurl) VALUES 
+    (${organizerid}, '${name}', '${owner}', '${venue}', '${description}', '${category}', '${createdDate}', '${conductedDate}', ${numZone}, '${zoneinfo}', '${totalSeat}' , '${imgurl}')`;
 
 
     db.query(query, (err, result) => {
@@ -285,7 +286,16 @@ app.delete('/customer/:id', (req, res) => {
 // CREATE
 app.post('/ticket', (req, res) => {
     const { concertid, customerid, receipt, zone, purchaseDate, used } = req.body;
-    const query = `INSERT INTO ticket (concertid, customerid, receipt, zone, purchaseDate, used) VALUES (${concertid}, ${customerid}, '${receipt}', '${zone}', '${purchaseDate}', ${used})`;
+    //default value for testing
+    // const concertid = 1;
+    // const customerid = 1;
+    // const receipt = "Receipt 1";
+    // const zone = "Zone 1";
+    // const purchaseDate = "2021-01-01";
+    // const used = false;
+
+    //INSERT INTO ticket ( concertid, customerid, receipt, zone, purchaseDate, used)
+    const query = `INSERT INTO ticket (concertid, customerid, receipt, zone, purchaseDate, used) VALUES (${concertid}, '${customerid}', '${receipt}', '${zone}', '${purchaseDate}', ${used})`;
     db.query(query, (err, result) => {
         if (err) {
             console.error(err);
@@ -297,20 +307,37 @@ app.post('/ticket', (req, res) => {
 });
 
 // READ
-app.get('/ticket/:id', (req, res) => {
-    const { id } = req.params;
-    const query = `SELECT * FROM ticket WHERE ticketid = ${id}`;
+// READ all tickets
+app.get('/ticket', (req, res) => {
+    const query = `SELECT * FROM ticket`;
     db.query(query, (err, result) => {
         if (err) {
             console.error(err);
-            res.status(500).send('Error fetching ticket');
+            res.status(500).send('Error fetching tickets');
         } else if (result.length === 0) {
-            res.status(404).send('Ticket not found');
+            res.status(404).send('No tickets found');
         } else {
-            res.status(200).send(result[0]);
+            res.status(200).send(result);
         }
     });
 });
+
+// GET tickets by customer ID
+app.get('/ticket/:id', (req, res) => {
+    const { id } = req.params;
+    const query = `SELECT * FROM ticket WHERE customerid = "${id}"`;
+    db.query(query, (err, result) => {
+        if (err) {
+            console.error(err);
+            res.status(500).send('Error fetching tickets');
+        } else if (result.length === 0) {
+            res.status(404).send('No tickets found for the customer');
+        } else {
+            res.status(200).send(result);
+        }
+    });
+});
+
 
 // UPDATE
 app.put('/ticket/:id', (req, res) => {
@@ -344,6 +371,21 @@ app.delete('/ticket/:id', (req, res) => {
         }
     });
 });
+
+
+// READ ALL CATEGORIES
+app.get('/category', (req, res) => {
+    const query = 'SELECT * FROM category';
+    db.query(query, (err, result) => {
+        if (err) {
+            console.error(err);
+            res.status(500).send('Error retrieving categories');
+        } else {
+            res.status(200).json(result);
+        }
+    });
+});
+
 
 app.listen(port, () => {
     console.log(`Server listening on port ${port}`);
